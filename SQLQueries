@@ -1,0 +1,87 @@
+-- creating db
+CREATE DATABASE IF NOT EXISTS walmartSales;
+
+-- create tables
+create table if not exists sales(
+	invoice_id varchar(30) not null primary key,
+    branch varchar(5) not null,
+    city varchar(30) not null,
+    customer_type varchar(30) not null,
+    gender varchar(5) not null,
+    unit_price decimal(10,2) not null,
+    quantity int not null,
+    tax_pct float(6,4) not null,
+    total decimal(12,4) not null,
+    date datetime not null,
+    time time not null,
+    payment varchar(15) not null,
+    cogs decimal(10,2) not null,
+    gross_margin_pct float(11,9),
+    gross_income decimal(12,4),
+    rating float(2,1)
+    );
+    
+    -- Add the time_of_day column
+SELECT
+	time,
+	(CASE
+		WHEN `time` BETWEEN "00:00:00" AND "12:00:00" THEN "Morning"
+        WHEN `time` BETWEEN "12:01:00" AND "16:00:00" THEN "Afternoon"
+        ELSE "Evening"
+    END) AS time_of_day
+FROM sales;
+
+alter table sales drop column time_of_day;
+
+ALTER TABLE sales ADD COLUMN time_of_day VARCHAR(20);
+
+select * from sales;
+
+UPDATE sales
+SET time_of_day = (
+	CASE
+		WHEN `time` BETWEEN "00:00:00" AND "12:00:00" THEN "Morning"
+        WHEN `time` BETWEEN "12:01:00" AND "16:00:00" THEN "Afternoon"
+        ELSE "Evening"
+    END
+);
+
+select date, dayname(date) as day_name from sales;
+
+alter table sales add column day_name varchar(20);
+
+update sales set day_name = dayname(date);
+
+select date, monthname(date) as Month_Name from sales;
+
+alter table sales add Month_Name varchar(20);
+
+update sales set Month_Name= monthname(date);
+
+-- How many unique cities does the data have?
+select distinct city from sales;
+
+-- In which city is each branch?
+select distinct city, branch from sales;
+
+-- How many unique product lines does the data have?
+select distinct Product_line from sales;
+				 
+-- What is  the most selling product line
+select sum(quantity) as total_quantity,
+Product_line from sales
+group by Product_line
+order by total_quantity desc;
+
+-- What is the total revenue by month
+select Month_Name, sum(total) as total_revenue from sales
+group by Month_Name
+order by total_revenue;
+
+-- What month had the largest COGS?
+select Month_name, sum(cogs) as total_cogs from sales
+group by Month_name
+order by total_cogs desc
+limit 1;
+
+
